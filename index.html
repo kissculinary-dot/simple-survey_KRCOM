@@ -99,7 +99,7 @@ body {
 <body>
 
 <div class="header">
-  <h2 id="mealHeader">Menu</h2>
+  <h2 id="mealHeader">KISS Culinary</h2>
   <h1>How was your meal experience?</h1>
 </div>
 
@@ -123,37 +123,42 @@ body {
 <div id="thankYou">Thank you for your feedback!</div>
 
 <script>
-// Replace with your Google Script URL
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKsuDxHNKHYWwGmP91pNyoMMR9_hwsEZl_lQtCvro3-PBJyd0E6giGJdhNQXu5XFpi/exec";
 
-// Dynamic header based on time
+// Time-based header logic
 function setMealHeader() {
   const header = document.getElementById("mealHeader");
   const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const totalMinutes = hours * 60 + minutes;
+  const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const breakfastStart = 7 * 60 + 30; // 7:30 AM
-  const breakfastEnd = 9 * 60;        // 9:00 AM
-  const koreanMenuStart = 12 * 60;    // 12:00 PM
-  const koreanMenuEnd = 15 * 60;      // 3:00 PM
-  const dinnerStart = 17 * 60;        // 5:00 PM
-  const dinnerEnd = 19 * 60;          // 7:00 PM
+  const breakfastStart = 7 * 60;           // 7:00 AM
+  const breakfastEnd = 11 * 60 + 59;       // 11:59 AM
+
+  const americanStart = 12 * 60;           // 12:00 PM
+  const americanEnd = 17 * 60 + 29;        // 5:29 PM
+
+  const dinnerStart = 17 * 60 + 30;        // 5:30 PM
+  const dinnerEnd = 21 * 60;               // 9:00 PM
 
   if (totalMinutes >= breakfastStart && totalMinutes <= breakfastEnd) {
-    header.textContent = "Breakfast from 7:30 AM - 9:00 AM";
-  } else if (totalMinutes >= koreanMenuStart && totalMinutes <= koreanMenuEnd) {
-    header.textContent = "Korean Menu";
-  } else if (totalMinutes >= dinnerStart && totalMinutes <= dinnerEnd) {
-    header.textContent = "Dinner from 5:00 PM - 7:00 PM";
-  } else {
-    header.textContent = "Menu";
+    header.textContent = "Breakfast";
+  } 
+  else if (totalMinutes >= americanStart && totalMinutes <= americanEnd) {
+    header.textContent = "American Menu";
+  } 
+  else if (totalMinutes >= dinnerStart && totalMinutes <= dinnerEnd) {
+    header.textContent = "Dinner";
+  } 
+  else {
+    header.textContent = "KISS Culinary";
   }
 }
 
-// Run on page load
+// Run on load
 setMealHeader();
+
+// Update automatically every minute
+setInterval(setMealHeader, 60000);
 
 document.querySelectorAll(".circle").forEach(button => {
   button.addEventListener("click", function () {
@@ -163,6 +168,7 @@ document.querySelectorAll(".circle").forEach(button => {
 
     fetch(SCRIPT_URL, {
       method: "POST",
+      mode: "no-cors",
       body: JSON.stringify({ response: value })
     });
 
