@@ -168,7 +168,7 @@ body {
 <div id="confirmationCheck">✅</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqjM1y72VQl0BXm8OHDWwQ2ciw7efm2Y1wPnD-HmVCJoOflUqegWfYP_411uw9U6vj2A/exec"; // <-- Update this
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqjM1y72VQl0BXm8OHDWwQ2ciw7efm2Y1wPnD-HmVCJoOflUqegWfYP_411uw9U6vj2A/exec";
 
 let selectedResponse = "";
 
@@ -178,19 +178,19 @@ function getCurrentMeal() {
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
   if (totalMinutes >= 420 && totalMinutes <= 719) return "Breakfast";       // 7:00 AM - 11:59 AM
-  if (totalMinutes >= 720 && totalMinutes <= 1049) return "American Menu"; // 12:00 PM - 5:29 PM
+  if (totalMinutes >= 720 && totalMinutes <= 1049) return "Korean Menu";   // 12:00 PM - 5:29 PM
   if (totalMinutes >= 1050 && totalMinutes <= 1260) return "Dinner";       // 5:30 PM - 9:00 PM
   return "Closed";
 }
 
-// Update meal header
+// Update meal header automatically
 function setMealHeader() {
   const header = document.getElementById("mealHeader");
   const meal = getCurrentMeal();
   header.textContent = meal === "Closed" ? "KISS Culinary" : meal;
 }
 setMealHeader();
-setInterval(setMealHeader, 60000);
+setInterval(setMealHeader, 60000); // Update every minute
 
 // Handle button clicks
 document.querySelectorAll(".circle").forEach(button => {
