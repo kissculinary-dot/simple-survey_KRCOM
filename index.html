@@ -71,13 +71,11 @@ body {
 
 .circle:hover {
   transform: scale(1.08);
-  box-shadow: 0 18px 45px rgba(0,0,0,0.2);
 }
 
 .selected {
   transform: scale(1.12);
-  background-color: #e0f7ff;
-  box-shadow: 0 20px 55px rgba(0,0,0,0.25);
+  background-color: #ffeaea;
 }
 
 #thankYou {
@@ -94,6 +92,58 @@ body {
 .show {
   opacity: 1;
 }
+
+/* Comment Box */
+#commentSection {
+  position: fixed;
+  bottom: 120px;
+  width: 100%;
+  display: none;
+}
+
+#commentBox {
+  width: 50%;
+  height: 120px;
+  font-size: 18px;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  resize: none;
+}
+
+#submitComment {
+  margin-top: 15px;
+  padding: 12px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #007acc;
+  color: white;
+}
+
+/* Confirmation Check */
+#confirmationCheck {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 180px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes bouncePop {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+  70%  { transform: translate(-50%, -50%) scale(0.95); }
+  85%  { transform: translate(-50%, -50%) scale(1.05); }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+#confirmationCheck.showCheck {
+  animation: bouncePop 0.6s ease forwards;
+}
 </style>
 </head>
 <body>
@@ -104,83 +154,96 @@ body {
 </div>
 
 <div class="options">
-  <button class="circle" data-value="Loved it">
-    ❤️
-    <span>Loved it</span>
-  </button>
+  <button class="circle" data-value="Loved it">❤️<span>Loved it</span></button>
+  <button class="circle" data-value="Okay">🙂<span>Okay</span></button>
+  <button class="circle" data-value="Needs improvement">⚠️<span>Needs Improvement</span></button>
+</div>
 
-  <button class="circle" data-value="Okay">
-    🙂
-    <span>Okay</span>
-  </button>
-
-  <button class="circle" data-value="Needs improvement">
-    ⚠️
-    <span>Needs Improvement</span>
-  </button>
+<div id="commentSection">
+  <textarea id="commentBox" placeholder="Please tell us what we can improve..."></textarea><br>
+  <button id="submitComment">Submit Feedback</button>
 </div>
 
 <div id="thankYou">Thank you for your feedback!</div>
+<div id="confirmationCheck">✅</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKsuDxHNKHYWwGmP91pNyoMMR9_hwsEZl_lQtCvro3-PBJyd0E6giGJdhNQXu5XFpi/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqjM1y72VQl0BXm8OHDWwQ2ciw7efm2Y1wPnD-HmVCJoOflUqegWfYP_411uw9U6vj2A/exec";
 
-// Time-based header logic
-function setMealHeader() {
-  const header = document.getElementById("mealHeader");
+let selectedResponse = "";
+
+/* Meal Logic */
+function getCurrentMeal() {
   const now = new Date();
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const breakfastStart = 7 * 60;           // 7:00 AM
-  const breakfastEnd = 11 * 60 + 59;       // 11:59 AM
-
-  const americanStart = 12 * 60;           // 12:00 PM
-  const americanEnd = 17 * 60 + 29;        // 5:29 PM
-
-  const dinnerStart = 17 * 60 + 30;        // 5:30 PM
-  const dinnerEnd = 21 * 60;               // 9:00 PM
-
-  if (totalMinutes >= breakfastStart && totalMinutes <= breakfastEnd) {
-    header.textContent = "Breakfast";
-  } 
-  else if (totalMinutes >= americanStart && totalMinutes <= americanEnd) {
-    header.textContent = "American Menu";
-  } 
-  else if (totalMinutes >= dinnerStart && totalMinutes <= dinnerEnd) {
-    header.textContent = "Dinner";
-  } 
-  else {
-    header.textContent = "KISS Culinary";
-  }
+  if (totalMinutes >= 420 && totalMinutes <= 719) return "Breakfast";
+  if (totalMinutes >= 720 && totalMinutes <= 1049) return "Korean Menu";
+  if (totalMinutes >= 1050 && totalMinutes <= 1260) return "Dinner";
+  return "Closed";
 }
 
-// Run on load
-setMealHeader();
+function setMealHeader() {
+  const header = document.getElementById("mealHeader");
+  const meal = getCurrentMeal();
+  header.textContent = meal === "Closed" ? "KISS Culinary" : meal;
+}
 
-// Update automatically every minute
+setMealHeader();
 setInterval(setMealHeader, 60000);
 
+/* Handle Button Clicks */
 document.querySelectorAll(".circle").forEach(button => {
   button.addEventListener("click", function () {
-    const value = this.dataset.value;
+    const mealType = getCurrentMeal();
+    if (mealType === "Closed") return;
 
-    this.classList.add("selected");
+    selectedResponse = this.dataset.value;
 
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({ response: value })
-    });
-
-    const thankYou = document.getElementById("thankYou");
-    thankYou.classList.add("show");
-
-    setTimeout(() => {
-      this.classList.remove("selected");
-      thankYou.classList.remove("show");
-    }, 2000);
+    if (selectedResponse === "Needs improvement") {
+      document.getElementById("commentSection").style.display = "block";
+    } else {
+      sendFeedback("");
+    }
   });
 });
+
+/* Submit Comment */
+document.getElementById("submitComment").addEventListener("click", function() {
+  const comment = document.getElementById("commentBox").value.trim();
+  sendFeedback(comment);
+});
+
+/* Send Feedback */
+function sendFeedback(comment) {
+  const mealType = getCurrentMeal();
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({
+      meal: mealType,
+      response: selectedResponse,
+      comment: comment
+    })
+  });
+
+  document.getElementById("commentSection").style.display = "none";
+  document.getElementById("commentBox").value = "";
+
+  const thankYou = document.getElementById("thankYou");
+  const check = document.getElementById("confirmationCheck");
+
+  thankYou.classList.add("show");
+  check.classList.remove("showCheck");
+  void check.offsetWidth;
+  check.classList.add("showCheck");
+
+  setTimeout(() => {
+    thankYou.classList.remove("show");
+    check.classList.remove("showCheck");
+  }, 2000);
+}
 </script>
 
 </body>
