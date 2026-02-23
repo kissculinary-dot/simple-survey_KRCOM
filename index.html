@@ -156,7 +156,7 @@ body {
 <div class="options">
   <button class="circle" data-value="Loved it">❤️<span>Loved it</span></button>
   <button class="circle" data-value="Okay">🙂<span>Okay</span></button>
-  <button class="circle" data-value="Needs improvement">⚠️<span>Needs Improvement</span></button>
+  <button class="circle" data-value="Needs Improvement">⚠️<span>Needs Improvement</span></button>
 </div>
 
 <div id="commentSection">
@@ -168,31 +168,31 @@ body {
 <div id="confirmationCheck">✅</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqjM1y72VQl0BXm8OHDWwQ2ciw7efm2Y1wPnD-HmVCJoOflUqegWfYP_411uw9U6vj2A/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqjM1y72VQl0BXm8OHDWwQ2ciw7efm2Y1wPnD-HmVCJoOflUqegWfYP_411uw9U6vj2A/exec"; // <-- Update this
 
 let selectedResponse = "";
 
-/* Meal Logic */
+// Determine current meal based on time
 function getCurrentMeal() {
   const now = new Date();
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  if (totalMinutes >= 420 && totalMinutes <= 719) return "Breakfast";
-  if (totalMinutes >= 720 && totalMinutes <= 1049) return "Korean Menu";
-  if (totalMinutes >= 1050 && totalMinutes <= 1260) return "Dinner";
+  if (totalMinutes >= 420 && totalMinutes <= 719) return "Breakfast";       // 7:00 AM - 11:59 AM
+  if (totalMinutes >= 720 && totalMinutes <= 1049) return "American Menu"; // 12:00 PM - 5:29 PM
+  if (totalMinutes >= 1050 && totalMinutes <= 1260) return "Dinner";       // 5:30 PM - 9:00 PM
   return "Closed";
 }
 
+// Update meal header
 function setMealHeader() {
   const header = document.getElementById("mealHeader");
   const meal = getCurrentMeal();
   header.textContent = meal === "Closed" ? "KISS Culinary" : meal;
 }
-
 setMealHeader();
 setInterval(setMealHeader, 60000);
 
-/* Handle Button Clicks */
+// Handle button clicks
 document.querySelectorAll(".circle").forEach(button => {
   button.addEventListener("click", function () {
     const mealType = getCurrentMeal();
@@ -200,23 +200,24 @@ document.querySelectorAll(".circle").forEach(button => {
 
     selectedResponse = this.dataset.value;
 
-    if (selectedResponse === "Needs improvement") {
+    if (selectedResponse === "Needs Improvement") {
       document.getElementById("commentSection").style.display = "block";
     } else {
-      sendFeedback("");
+      sendFeedback(""); // Automatically send for Loved it / Okay
     }
   });
 });
 
-/* Submit Comment */
+// Submit comment for Needs Improvement
 document.getElementById("submitComment").addEventListener("click", function() {
   const comment = document.getElementById("commentBox").value.trim();
   sendFeedback(comment);
 });
 
-/* Send Feedback */
+// Send feedback to Apps Script
 function sendFeedback(comment) {
   const mealType = getCurrentMeal();
+  if (mealType === "Closed") return;
 
   fetch(SCRIPT_URL, {
     method: "POST",
@@ -228,6 +229,7 @@ function sendFeedback(comment) {
     })
   });
 
+  // Reset UI
   document.getElementById("commentSection").style.display = "none";
   document.getElementById("commentBox").value = "";
 
@@ -236,7 +238,7 @@ function sendFeedback(comment) {
 
   thankYou.classList.add("show");
   check.classList.remove("showCheck");
-  void check.offsetWidth;
+  void check.offsetWidth; // trigger reflow
   check.classList.add("showCheck");
 
   setTimeout(() => {
